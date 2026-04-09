@@ -1,0 +1,44 @@
+# Apache VirtualHost Configuration for Audit FUP
+# Save this to your Apache config (httpd-vhosts.conf or httpd.conf)
+
+# For XAMPP, add to C:\xampp\apache\conf\extra\httpd-vhosts.conf
+
+<VirtualHost *:80>
+    DocumentRoot "C:/xampp/htdocs/audit-fup/frontend/dist"
+    ServerName localhost
+    ServerAlias localhost
+    
+    <Directory "C:/xampp/htdocs/audit-fup/frontend/dist">
+        Options -Indexes +FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+
+    # Proxy API requests to Node.js backend
+    ProxyPreserveHost On
+    ProxyPass /api http://localhost:3000/api
+    ProxyPassReverse /api http://localhost:3000/api
+
+    ErrorLog "logs/audit-fup-error.log"
+    CustomLog "logs/audit-fup-access.log" combined
+</VirtualHost>
+
+# For HTTPS (when SSL is enabled):
+# <VirtualHost *:443>
+#     DocumentRoot "C:/xampp/htdocs/audit-fup/frontend/dist"
+#     ServerName localhost
+#     
+#     SSLEngine on
+#     SSLCertificateFile "conf/ssl.crt/server.crt"
+#     SSLCertificateKeyFile "conf/ssl.key/server.key"
+#     
+#     <Directory "C:/xampp/htdocs/audit-fup/frontend/dist">
+#         Options -Indexes +FollowSymLinks
+#         AllowOverride All
+#         Require all granted
+#     </Directory>
+#     
+#     ProxyPreserveHost On
+#     ProxyPass /api http://localhost:3000/api
+#     ProxyPassReverse /api http://localhost:3000/api
+# </VirtualHost>

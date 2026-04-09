@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: audit-fup-backend
+    region: oregon
+    env:
+      - fromGroup: audit-fup-env
+    buildCommand: cd backend && npm install
+    startCommand: node backend/src/index.js
+    autoDeploy: false
+    disk:
+      enabled: true
+      mountPath: /app/uploads
+      size: 1Gi

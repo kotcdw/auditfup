@@ -1,0 +1,15 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /audit-fup/
+  RewriteRule ^index\.html$ - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule . /audit-fup/index.html [L]
+</IfModule>
+
+# Proxy API requests to Node.js backend
+<IfModule mod_proxy.c>
+  ProxyPreserveHost On
+  ProxyPass /api http://localhost:3000/api
+  ProxyPassReverse /api http://localhost:3000/api
+</IfModule>
