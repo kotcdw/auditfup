@@ -8,8 +8,8 @@ COPY frontend/package*.json ./frontend/
 RUN cd backend && npm install --production
 
 COPY backend/ ./backend/
-COPY frontend/dist ./frontend/public/
-COPY backend/src ./backend/src
+
+RUN cd frontend && npm install && npm run build
 
 EXPOSE 3000
 
