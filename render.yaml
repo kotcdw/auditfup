@@ -4,10 +4,23 @@ services:
     region: oregon
     env:
       - fromGroup: audit-fup-env
-    buildCommand: cd backend && npm install
-    startCommand: node backend/src/index.js
-    autoDeploy: false
-    disk:
-      enabled: true
-      mountPath: /app/uploads
-      size: 1Gi
+      - key: DB_TYPE
+        value: postgresql
+      - key: DB_HOST
+        fromService: audit-fup-db
+      - key: DB_USER
+        fromService: audit-fup-db
+      - key: DB_PASSWORD
+        fromService: audit-fup-db
+      - key: DB_NAME
+        fromService: audit-fup-db
+    buildCommand: npm install
+    startCommand: node src/index.js
+    autoDeploy: true
+
+  - type: pserv
+    name: audit-fup-db
+    region: oregon
+    plan: free
+    postgresVersion: 16
+    postgresMachine: burstable
