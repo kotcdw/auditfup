@@ -5,9 +5,6 @@ services:
     plan: free
     postgresVersion: 16
     postgresMachine: burstable
-    env:
-      - key: DATABASE
-        value: audit_fup_db
 
   - type: web
     name: audit-fup-backend
