@@ -8,46 +8,47 @@ This guide covers how to deploy your Audit Follow-Up Management System for free.
 
 ### Prerequisites
 - GitHub account
-- Your project pushed to GitHub
+- Your project pushed to GitHub (https://github.com/kotcdw/auditfup.git)
 
 ### Steps
 
-1. **Push code to GitHub**
-   ```bash
-   cd C:\xampp\htdocs\audit-fup
-   git init
-   git add .
-   git commit -m "Initial commit"
-   # Create repo on GitHub and push
+1. **Go to** https://dashboard.render.com
+2. **Create new Blueprint** - Click "New" → "Blueprint"
+3. **Connect your repo** - Select `kotcdw/auditfup` from GitHub
+4. **Review render.yaml** - It will create both the PostgreSQL database and backend service
+5. **Click "Apply"** - Render will create:
+   - `audit-fup-db` - PostgreSQL 16 (free)
+   - `audit-fup-backend` - Node.js web service
+6. **Done!** - Auto-deploys when complete
+
+### Environment Variables (Auto-configured)
+The render.yaml automatically configures:
+- `DB_TYPE=postgresql`
+- `DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` from the PostgreSQL service
+
+You only need to set in Render dashboard:
+```
+JWT_SECRET=your-secure-random-string-min-32-chars
+JWT_EXPIRES_IN=24h
+```
+
+### Manual Setup (if not using Blueprint)
+1. Create PostgreSQL: New → PostgreSQL
+2. Create Web Service: New → Web Service
+3. Configure:
+   - Name: `audit-fup-backend`
+   - Region: Oregon
+   - Build Command: `cd backend && npm install`
+   - Start Command: `node backend/src/index.js`
+4. Add Environment Variables:
    ```
-
-2. **Set up Render**
-   - Go to https://render.com and sign up
-   - Click "New" → "Web Service"
-   - Connect your GitHub and select the `audit-fup` repo
-
-3. **Configure**
-   - **Name:** `audit-fup`
-   - **Region:** Oregon (or closest to you)
-   - **Branch:** main
-   - **Build Command:** `cd backend && npm install`
-   - **Start Command:** `node backend/src/index.js`
-
-4. **Environment Variables** (in Render dashboard)
-   ```
-   PORT=3000
-   DB_HOST=your-mysql-host.render.com
-   DB_USER=your-db-user
-   DB_PASSWORD=your-db-password
-   DB_NAME=audit_fup_db
+   DB_TYPE=postgresql
+   DB_HOST=<from PostgreSQL internal URL>
+   DB_USER=<from PostgreSQL>
+   DB_PASSWORD=<from PostgreSQL>
+   DB_NAME=<from PostgreSQL>
    JWT_SECRET=your-secure-random-string
    ```
-
-5. **Database** (Free PostgreSQL on Render)
-   - In Render dashboard: New → PostgreSQL
-   - Copy the "Internal Database URL" to DB_HOST
-
-6. **Deploy** - Click "Create Web Service"
 
 ---
 
@@ -55,13 +56,17 @@ This guide covers how to deploy your Audit Follow-Up Management System for free.
 
 1. **Go to** https://railway.app and sign up
 2. **New Project** → "Empty Project"
-3. **Add MySQL** - Click "New" → "MySQL"
+3. **Add PostgreSQL** - Click "New" → "PostgreSQL"
 4. **Add Node.js** - Click "New" → "GitHub Repo" → select your repo
 5. **Configure:**
    - **Root Directory:** backend
    - **Build Command:** `npm install`
    - **Start Command:** `node src/index.js`
-6. **Variables** - Add same as Render above
+6. **Variables** - Add:
+   ```
+   DB_TYPE=postgresql
+   JWT_SECRET=your-secure-string
+   ```
 7. **Deploy**
 
 ---
@@ -71,91 +76,62 @@ This guide covers how to deploy your Audit Follow-Up Management System for free.
 1. **Install CLI:** `npm install -g flyctl`
 2. **Sign up:** `flyctl auth signup`
 3. **Create app:** `flyctl apps create audit-fup`
-4. **Add MySQL:** `flyctl postgres create`
+4. **Add PostgreSQL:** `flyctl postgres create`
 5. **Deploy:** `flyctl deploy`
-6. **Set variables:** `flyctl secrets set JWT_SECRET=your-secret DB_HOST=...`
+6. **Set variables:** `flyctl secrets set DB_TYPE=postgresql JWT_SECRET=your-secret`
 
 ---
 
-## Option 4: Oracle Cloud (Always Free)
+## Local Development (XAMPP)
 
-1. **Sign up** at https://cloud.oracle.com
-2. **Create VM** - Compute → Instances
-3. **Configure:**
-   - Image: Ubuntu 22.04
-   - Shape: VM.Standard.E2.1.Micro (Always Free)
-4. **Connect via SSH** and run:
+1. Start XAMPP MySQL
+2. Navigate to backend folder:
    ```bash
-   # Install Node.js
-   curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-   sudo apt-get install -y nodejs
-   
-   # Install MySQL
-   sudo apt install mysql-server
-   
-   # Clone your repo
-   git clone your-repo-url
-   cd audit-fup
-   cd backend && npm install
+   cd C:\xampp\htdocs\audit-fup\backend
+   npm install
    node src/index.js
    ```
+3. Server runs at http://localhost:3000
 
 ---
 
-## Environment Variables Needed
+## Environment Variables
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| PORT | Server port | 3000 |
-| DB_HOST | Database hostname | mysql.render.com |
-| DB_USER | Database username | postgres |
-| DB_PASSWORD | Database password | ***** |
-| DB_NAME | Database name | audit_fup_db |
-| JWT_SECRET | Secret for JWT tokens | random-32-char-string |
-
----
-
-## Database Setup for Cloud
-
-Since you're using XAMPP MySQL locally, you need to either:
-
-### Option A: Export and Import to Cloud DB
-
-1. **Export from XAMPP:**
-   ```bash
-   mysqldump -u root audit_fup_db > backup.sql
-   ```
-
-2. **Import to cloud (after creating DB):**
-   ```bash
-   mysql -h cloud-host -u user -p audit_fup_db < backup.sql
-   ```
-
-### Option B: Let the App Create Tables
-
-The app already has `initDatabase()` that creates tables on first run - just make sure the DB is empty or new.
+| Variable | Description | Local (XAMPP) | Render |
+|----------|-------------|---------------|--------|
+| PORT | Server port | 3000 | 3000 |
+| DB_TYPE | Database type | mysql | postgresql |
+| DB_HOST | Database hostname | localhost | (auto) |
+| DB_USER | Database username | root | (auto) |
+| DB_PASSWORD | Database password | (empty) | (auto) |
+| DB_NAME | Database name | audit_fup_db | (auto) |
+| JWT_SECRET | Secret for JWT tokens | your-secret | your-secret |
+| JWT_EXPIRES_IN | Token expiration | 24h | 24h |
 
 ---
 
-## Frontend Build
+## Database Setup
 
-The frontend needs to be built for production. Already done:
-- Run `npm run build` in frontend folder
-- Output is in `frontend/dist/`
+### On First Deploy
+The app's `initDatabase()` creates all tables automatically.
 
-For production serving, the backend can serve the static files or use a CDN.
+### Frontend Build
+The frontend is already built. For production:
+```bash
+cd frontend
+npm run build
+```
+Output: `frontend/dist/`
 
 ---
 
 ## Quick Start Checklist
 
-- [ ] Push code to GitHub
-- [ ] Create free account on Render.com
-- [ ] Create PostgreSQL database
-- [ ] Create Web Service for backend
-- [ ] Set environment variables
-- [ ] Deploy
-- [ ] Test at your-app-name.onrender.com
+- [x] Push code to GitHub
+- [ ] Create Render account
+- [ ] Create Blueprint from render.yaml
+- [ ] Apply and wait for deployment
+- [ ] Test at https://audit-fup-backend.onrender.com/api/health
 
 ---
 
@@ -163,8 +139,12 @@ For production serving, the backend can serve the static files or use a CDN.
 
 ### Common Issues:
 1. **Build fails** - Check build command is `cd backend && npm install`
-2. **Database connection** - Verify DB_HOST, DB_USER, DB_PASSWORD
-3. **Port error** - Make sure server listens on PORT env variable (already configured)
+2. **Database connection** - Verify PostgreSQL service is running
+3. **Port error** - Server listens on PORT env variable
+
+### Check Logs:
+In Render dashboard → your service → "Logs"
 
 ### Need Help?
-The backend code is already configured to use environment variables from `.env` file.
+The backend code supports both MySQL (local) and PostgreSQL (cloud).
+Set `DB_TYPE=mysql` for local XAMPP, `DB_TYPE=postgresql` for cloud.
