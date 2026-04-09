@@ -5,6 +5,9 @@ services:
     plan: free
     postgresVersion: 16
     postgresMachine: burstable
+    env:
+      - key: DATABASE
+        value: audit_fup_db
 
   - type: web
     name: audit-fup-backend
@@ -14,25 +17,6 @@ services:
         value: postgresql
       - key: JWT_SECRET
         generateValue: true
-      - key: DB_HOST
-        valueFromService:
-          name: audit-fup-db
-          property: host
-      - key: DB_USER
-        valueFromService:
-          name: audit-fup-db
-          property: user
-      - key: DB_PASSWORD
-        valueFromService:
-          name: audit-fup-db
-          property: password
-      - key: DB_NAME
-        valueFromService:
-          name: audit-fup-db
-          property: database
     buildCommand: cd backend && npm install
     startCommand: cd backend && node src/index.js
     autoDeploy: true
-    dependsOn:
-      - serviceName: audit-fup-db
-        environmentKey: DB_HOST
