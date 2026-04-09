@@ -5,26 +5,10 @@ services:
     env:
       - key: DB_TYPE
         value: postgresql
-      - key: DB_HOST
-        fromService:
-          name: audit-fup-db
-          envVarName: PGHOST
-      - key: DB_USER
-        fromService:
-          name: audit-fup-db
-          envVarName: PGUSER
-      - key: DB_PASSWORD
-        fromService:
-          name: audit-fup-db
-          envVarName: PGPASSWORD
-      - key: DB_NAME
-        fromService:
-          name: audit-fup-db
-          envVarName: PGDATABASE
       - key: JWT_SECRET
         generateValue: true
     buildCommand: cd backend && npm install
-    startCommand: node backend/src/index.js
+    startCommand: cd backend && node src/index.js
     autoDeploy: true
 
   - type: pserv

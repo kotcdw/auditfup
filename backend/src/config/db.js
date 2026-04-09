@@ -4,6 +4,7 @@ const { Pool: PgPool } = require('pg');
 const dbType = process.env.DB_TYPE || 'mysql';
 
 let pool;
+let dbTypeExport = dbType;
 
 if (dbType === 'postgresql') {
   const pgPool = new PgPool({
@@ -43,4 +44,4 @@ if (dbType === 'postgresql') {
 }
 
 module.exports = pool;
-module.exports.dbType = dbType;
+module.exports.dbType = dbTypeExport;
